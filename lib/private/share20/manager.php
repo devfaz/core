@@ -2,6 +2,10 @@
 
 namespace OC\Share20;
 
+use OCP\IUserManager;
+use OCP\IGroupManager;
+use OCP\IUser;
+
 use OC\Share20\Exceptions\ShareNotFoundException;
 
 /**
@@ -9,6 +13,38 @@ use OC\Share20\Exceptions\ShareNotFoundException;
  */
 class Manager {
 
+	/**
+	 * Share provider for user, group and link shares
+	 * @var IShareProvider
+	 */
+	private $storageShareProvider
+
+	/**
+	 * Share provider for federated shares
+	 * @var ISharePrvider
+	 */
+	private $federatedShareProvider
+
+	/** @var IUser */
+	private $currentUser;
+
+	/** @var IUserManager */
+	private $userManager;
+
+	/** @var IGroupManager */
+	private $groupManager;
+
+	public function __construct(IShareProvider $storageShareProvider,
+	                            IShareProvider $federatedShareProvider,
+	                            IUser $user,
+	                            IUserManager $userManager,
+	                            IGroupManager $groupManager) {
+		$this->storageShareProvider = $storageShareProvider;
+		$this->federatedShareProvider = $federatedShareProvider;
+		$this->user = $user;
+		$this->userManager = $userManager;
+		$this->groupManager = $groupManager;
+	}
 
 	/**
 	 * Share a path
