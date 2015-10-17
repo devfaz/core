@@ -72,6 +72,13 @@ class Manager {
 	 * @return [Share]
 	 */
 	public function getShares() {
+		$storageShares = $this->storageShareProvider->getShares($this->currentUser);
+		$federatedShares = $this->federatedShareProvider->getShares($this->currentUser);
+
+		//TODO: ID's should be unique who handles this?
+
+		$shares = array_merge($storageShares, $federatedShares);
+		return $shares;
 	}
 
 	/**
@@ -83,6 +90,25 @@ class Manager {
 	 * @throws ShareNotFoundException
 	 */
 	public function getShareById($id) {
+		$share = null;
+		$found = false;
+
+		try {
+			$share = $this->storageShareProvider->getShareById($this->currentUser, $id);
+		} catch (ShareNotFoundException $e) {
+
+		}
+		
+		try {
+			$share = $this->federatedShareProvider->getShareById($this->currentUser, $id);
+		} catch (ShareNotFoundException $e) {
+		}
+
+		if ($found === false) {
+			throw new ShareNotFoundException;
+		}
+		
+		return $share;
 	}
 
 	/**
@@ -92,6 +118,13 @@ class Manager {
 	 * @return [Share]
 	 */
 	public function getSharesByPath(\OCP\Files\Node $path) {
+		$storageShares = $this->storageShareProvider->getSharesByPath($this->currentUser, $path);
+		$federatedShares = $this->federatedShareProvider->getSharesByPath($this->currentUser, $path);
+
+		//TODO: ID's should be unique who handles this?
+
+		$shares = array_merge($storageShares, $federatedShares);
+		return $shares;
 	}
 
 	/**
@@ -100,6 +133,13 @@ class Manager {
 	 * @return [Share]
 	 */
 	public function getSharedWithMe($shareType = null) {
+		$storageShares = $this->storageShareProvider->getSharedWithMe($this->currentUser, $shareType);
+		$federatedShares = $this->federatedShareProvider->getSharedWithMe($this->currentUser, $shareType);
+
+		//TODO: ID's should be unique who handles this?
+
+		$shares = array_merge($storageShares, $federatedShares);
+		return $shares;
 	}
 
 	/**
@@ -111,6 +151,25 @@ class Manager {
 	 * @throws ShareNotFoundException
 	 */
 	public function getShareByToken($token) {
+		$share = null;
+		$found = false;
+
+		try {
+			$share = $this->storageShareProvider->getShareByToken($this->currentUser, $token);
+		} catch (ShareNotFoundException $e) {
+
+		}
+		
+		try {
+			$share = $this->federatedShareProvider->getShareByToken($this->currentUser, $token);
+		} catch (ShareNotFoundException $e) {
+		}
+
+		if ($found === false) {
+			throw new ShareNotFoundException;
+		}
+		
+		return $share;
 	}
 
 }
