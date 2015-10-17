@@ -2,14 +2,58 @@
 
 namespace OC\Share20;
 
+use OCP\IUser;
+use OCP\IGroup;
+use OCP\Files\Node;
+
 class share {
-	
+
+	/** @var IShareProvider */
+	private $provider;
+
+	/** @var int */
+	private $id;
+
+	/** @var Node $path */
+	private $path;
+
+	/** @var int */
+	private $shareType;
+
+	/** @var IUser|IGroup|string */
+	private $shareWith;
+
+	/** @var IUser|string */
+	private $sharedBy;
+
+	/** @var IUser|string */
+	private $shareOwner;
+
+	/** @var int */
+	private $permissions;
+
+	/** @var \DateTime */
+	private $expireDate;
+
+	public function __construct(IShareProvider $provider,
+	                            $id,
+	                            \OCP\Files\Node $path,
+	                            $shareType,
+	                            $shareWith,
+	                            $sharedBy,
+	                            $shareOwner,
+	                            $permissions,
+	                            \DateTime $expireDate = null) {
+	}
+
+
 	/**
 	 * Get the id
 	 *
 	 * @return int
 	 */
 	public function getId() {
+		return $this->id;
 	}
 
 	/**
@@ -18,6 +62,7 @@ class share {
 	 * @return \OCP\Files\Node
 	 */
 	public function getPath() {
+		return $this->path;
 	}
 
 	/**
@@ -26,6 +71,7 @@ class share {
 	 * @return int
 	 */
 	public function getShareType() {
+		return $this->shareType();
 	}
 
 	/**
@@ -34,6 +80,7 @@ class share {
 	 * @return \OCP\IUser | \OCP\IGroup | string
 	 */
 	public function getShareWith() {
+		return $this->shareWith();
 	}
 
 	/**
@@ -42,6 +89,7 @@ class share {
 	 * @return \OCP\IUser
 	 */
 	public function getSharedBy() {
+		return $this->sharedBy();
 	}
 
 	/**
@@ -50,6 +98,7 @@ class share {
 	 * @return \OCP\IUser
 	 */
 	public function getShareOwner() {
+		return $this->shareOwner;
 	}
 
 	/**
@@ -58,6 +107,7 @@ class share {
 	 * @return int
 	 */
 	public function getPermissions() {
+		return $this->permissions;
 	}
 
 	/**
@@ -66,6 +116,8 @@ class share {
 	 * @param int $permissions
 	 */
 	public function setPermissions($permissions) {
+		//TODO sanity checks
+		$this->provider->setSharePermissions($this->id, $permissions);
 	}
 
 	/**
@@ -74,6 +126,7 @@ class share {
 	 * @return \DateTime
 	 */
 	public function getExpirationDate() {
+		return $this->expireDate;
 	}
 
 	/**
@@ -82,6 +135,7 @@ class share {
 	 * @param \DateTime $expireDate
 	 */
 	public function setExpirationDate(\DateTime $expireDate) {
+		$this->provider->setShareExpirationDate($this->id, $expireDate);
 	}
 
 	/**
@@ -91,6 +145,7 @@ class share {
 	 * @return bool
 	 */
 	public function verifyPassword($password) {
+		return $this->provider->verifySharePassword($this->id, $password);
 	}
 
 	/**
@@ -99,23 +154,27 @@ class share {
 	 * @param string password
 	 */
 	public function setPassword($password) {
+		$this->provider->setSharePassword($this->id, $password);
 	}
 	
 	/**
 	 * Accept the share
 	 */
 	public function accept() {
+		$this->provider->acceptShare($this->id);
 	}
 
 	/**
 	 * Reject the share
 	 */
 	public function reject() {
+		$this->provider->rejectShare($this->id);
 	}
 
 	/**
 	 * Delete the share
 	 */
 	public function delete() {
+		$this->provider->deleteShare($this->id);
 	}
 }

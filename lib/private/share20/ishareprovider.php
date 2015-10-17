@@ -87,7 +87,7 @@ interface IShareProvider {
 	 * @param int $id
 	 * @param string $password
 	 */
-	public function setPassword($id, $password);
+	public function setSharePassword($id, $password);
 
 	/**
 	 * Verify the password
@@ -95,7 +95,7 @@ interface IShareProvider {
 	 * @param int $id
 	 * @param string $password
 	 */
-	public function verifyPassword($id, $password);
+	public function verifySharePassword($id, $password);
 
 	/**
 	 * Accept a share
