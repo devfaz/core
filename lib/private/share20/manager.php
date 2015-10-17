@@ -172,4 +172,31 @@ class Manager {
 		return $share;
 	}
 
+	/**
+	 * Get access list to a path. This means
+	 * all the users and groups that can access a given path.
+	 *
+	 * Consider:
+	 * -root
+	 * |-folder1
+	 *  |-folder2
+	 *   |-fileA
+	 *
+	 * fileA is shared with user1
+	 * folder2 is shared with group2
+	 * folder1 is shared with user2
+	 *
+	 * Then the access list will to '/folder1/folder2/fileA' is:
+	 * [
+	 * 	'users' => ['user1', 'user2'],
+	 *  'groups' => ['group2']
+	 * ]
+	 *
+	 * This is required for encryption
+	 *
+	 * @param \OCP\Files\Node $path
+	 * @return array
+	 */
+	public function getAccessList(\OCP\Files\Node $path) {
+	}
 }
