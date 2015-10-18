@@ -90,22 +90,14 @@ class Manager {
 	 * @throws ShareNotFoundException
 	 */
 	public function getShareById($id) {
-		$share = null;
-		$found = false;
+		//TODO some magic to deterine which provider is responsible for the id
+		$provider = getShareProvider($id);
 
 		try {
-			$share = $this->storageShareProvider->getShareById($this->currentUser, $id);
+			$share = $provider->storageShareProvider->getShareById($this->currentUser, $id);
 		} catch (ShareNotFoundException $e) {
-
-		}
-		
-		try {
-			$share = $this->federatedShareProvider->getShareById($this->currentUser, $id);
-		} catch (ShareNotFoundException $e) {
-		}
-
-		if ($found === false) {
-			throw new ShareNotFoundException;
+			//TODO: Some error handling?
+			throw new ShareNotFoundException();
 		}
 		
 		return $share;
@@ -151,22 +143,12 @@ class Manager {
 	 * @throws ShareNotFoundException
 	 */
 	public function getShareByToken($token) {
-		$share = null;
-		$found = false;
-
+		// Only link shares have tokens and they are handeld by the storageShareProvider
 		try {
 			$share = $this->storageShareProvider->getShareByToken($this->currentUser, $token);
 		} catch (ShareNotFoundException $e) {
-
-		}
-		
-		try {
-			$share = $this->federatedShareProvider->getShareByToken($this->currentUser, $token);
-		} catch (ShareNotFoundException $e) {
-		}
-
-		if ($found === false) {
-			throw new ShareNotFoundException;
+			// TODO some error handling
+			throw new ShareNotFoundException();
 		}
 		
 		return $share;
@@ -198,5 +180,15 @@ class Manager {
 	 * @return array
 	 */
 	public function getAccessList(\OCP\Files\Node $path) {
+	}
+
+	/**
+	 * Get the share provider based on the share id
+	 *
+	 * @param int $id
+	 * @return IShareProvider
+	 */
+	private function getShareProvider($id) {
+
 	}
 }
