@@ -46,8 +46,6 @@ class Manager {
 	                            IGroupManager $groupManager,
 								ILogger $logger,
 								IAppConfig $appConfig) {
-		$this->storageShareProvider = $storageShareProvider;
-		$this->federatedShareProvider = $federatedShareProvider;
 		$this->user = $user;
 		$this->userManager = $userManager;
 		$this->groupManager = $groupManager;
@@ -79,28 +77,62 @@ class Manager {
 			if (isset($this->shareTypeToShareProvider[$shareType])) {
 				//THROW EXCEPTION
 			}
-			$this->shareTypeToShareProvider[$shareType] = &$this->shareProviders[$id];
+			$this->shareTypeToShareProvider[$shareType] = $id;
 		}
+	}
+
+	/**
+	 * Get a ShareProvider
+	 *
+	 * @param string $id
+	 * @return IShareProvider
+	 */
+	private function getShareProvider($id) {
+		if (!isset($this->shareProviders)) {
+			//Throw exception
+		}
+
+		$provider = call_user_func($this->shareProviders[$id]['callback']);
+		if (!($provider instanceof \OC\Share20\IShareProvider)) {
+			//Throw exception
+		}
+
+		return $provider;
+	}
+
+	/**
+	 * Get shareProvider based on shareType
+	 *
+	 * @param int $shareType
+	 * @return IShareProvider
+	 */
+	private function getShareProviderByType($shareType) {
+		if (!isset($this->shareTypeToShareProvider[$shareType])) {
+			//Throw exception
+		}
+
+		return $this->getShareProvider($this->shareTypeToShareProvider[$shareType]);
 	}
 
 	/**
 	 * Share a path
 	 * 
-	 * @param \OCP\Files\Node $path
+	 * @param string $path
 	 * @param int $shareType
 	 * @param string $shareWith
 	 * @param int $permissions
 	 * @param \DateTime $expireDate
 	 * @param $password
 	 */
-	public function share(\OCP\Files\Node $path,
+	public function share($path,
 	                      $shareType,
 	                      $shareWith,
 	                      $permissions = 31,
 	                      \DateTime $expireDate = null,
 	                      $password = null) {
 
-		//TODO some path checkes?
+		//TODO some path checkes
+		//Convert to Node etc
 
 		/*
 		 * Basic sanity checks for the $shareType and $shareWith
@@ -155,13 +187,7 @@ class Manager {
 		 * TODO Verify password strength etc
 		 */
 
-	
-		// Verify that we can actually share this type
-		if (!isset($this->shareTypeToShareProvider[$shareType])) {
-			//THROW EXCEPTION
-		}
-
-		$provider = call_user_func($this->shareTypeToShareProvider[$shareType]['callback']);
+		$provider = $this->getShareProviderByType($shareType);
 		$share = $provider->share($path, $shareType, $shareWith, $permissions, $expireDate, $password);
 
 		return $share;
@@ -171,6 +197,7 @@ class Manager {
 	 * Retrieve all share by the current user
 	 */
 	public function getShares() {
+
 		$storageShares = $this->storageShareProvider->getShares($this->currentUser);
 		$federatedShares = $this->federatedShareProvider->getShares($this->currentUser);
 
@@ -339,16 +366,6 @@ class Manager {
 	 * @param string $id
 	 */
 	public function delete($id) {
-	}
-
-	/**
-	 * Get the share provider based on the share id
-	 *
-	 * @param string $id
-	 * @return IShareProvider
-	 */
-	private function getShareProvider($id) {
-
 	}
 
 	/**
