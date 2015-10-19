@@ -2,6 +2,8 @@
 
 namespace OC\Share20;
 
+
+use OCP\IAppConfig
 use OCP\IUserManager;
 use OCP\IGroupManager;
 use OCP\IUser;
@@ -38,18 +40,23 @@ class Manager {
 	/** @var ILogger */
 	private $logger;
 
+	/** @var IAppConfig */
+	private $appConfig;
+
 	public function __construct(IShareProvider $storageShareProvider,
 	                            IShareProvider $federatedShareProvider,
 	                            IUser $user,
 	                            IUserManager $userManager,
 	                            IGroupManager $groupManager,
-								ILogger $logger) {
+								ILogger $logger,
+								IAppConfig $appConfig) {
 		$this->storageShareProvider = $storageShareProvider;
 		$this->federatedShareProvider = $federatedShareProvider;
 		$this->user = $user;
 		$this->userManager = $userManager;
 		$this->groupManager = $groupManager;
 		$this->logger = $logger;
+		$this->appConfig = $appConfig;
 	}
 
 	/**
