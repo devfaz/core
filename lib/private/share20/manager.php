@@ -17,16 +17,14 @@ use OC\Share20\Exceptions\ShareNotFoundException;
 class Manager {
 
 	/**
-	 * Share provider for user, group and link shares
-	 * @var IShareProvider
+	 * @var IShareProvider[]
 	 */
-	private $storageShareProvider
+	private $shareProviders;
 
 	/**
-	 * Share provider for federated shares
-	 * @var ISharePrvider
+	 * @var IShareProver[]
 	 */
-	private $federatedShareProvider
+	private $shareTypeToShareProvider;
 
 	/** @var IUser */
 	private $currentUser;
@@ -43,9 +41,7 @@ class Manager {
 	/** @var IAppConfig */
 	private $appConfig;
 
-	public function __construct(IShareProvider $storageShareProvider,
-	                            IShareProvider $federatedShareProvider,
-	                            IUser $user,
+	public function __construct(IUser $user,
 	                            IUserManager $userManager,
 	                            IGroupManager $groupManager,
 								ILogger $logger,
@@ -57,6 +53,34 @@ class Manager {
 		$this->groupManager = $groupManager;
 		$this->logger = $logger;
 		$this->appConfig = $appConfig;
+	}
+
+	/**
+	 * Registers a callback function which much return a IShareProvider
+	 *
+	 * @param string $id
+	 * @param string $displayName
+	 * @param int[] $shareTypes
+	 * @param callacble $callBack
+	 */
+	public function registerShareProvider($id, $displayName, $shareTypes, callable $callBack) {
+		if (isset($this->shareProviders[$id])) {
+			//THROW EXCEPTION
+		}
+
+		$this->shareProviders[$id] = [
+			'id' => $id,
+			'displayName' => $displayName,
+			'shareTypes' => $shareTypes,
+			'callback' => $callBack,
+		];
+
+		foreach ($shareTypes as $shareType) {
+			if (isset($this->shareTypeToShareProvider[$shareType])) {
+				//THROW EXCEPTION
+			}
+			$this->shareTypeToShareProvider[$shareType] = &$this->shareProviders[$id];
+		}
 	}
 
 	/**
@@ -131,15 +155,14 @@ class Manager {
 		 * TODO Verify password strength etc
 		 */
 
-		if ($shareType === \OC\Share\Constants::SHARE_TYPE_USER ||
-		    $shareType === \OC\Share\Constants::SHARE_TYPE_GROUP ||
-		    $shareType === \OC\Share\Constants::SHARE_TYPE_LINK) {
-			$share = $this->storageShareProvider($path, $shareType, $shareWith, $permissions, $expireDate, $password);			
-		} else if ($shareType === \OC\Share\Constants::SHARE_TYPE_REMOTE) {
-			$share = $this->federatedShareProvider($path, $shareType, $shareWith, $permissions, $expireDate, $password);
-		} else {
-			//TODO: EXCEPTION not a valid share type
+	
+		// Verify that we can actually share this type
+		if (!isset($this->shareTypeToShareProvider[$shareType])) {
+			//THROW EXCEPTION
 		}
+
+		$provider = call_user_func($this->shareTypeToShareProvider[$shareType]['callback']);
+		$share = $provider->share($path, $shareType, $shareWith, $permissions, $expireDate, $password);
 
 		return $share;
 	}
