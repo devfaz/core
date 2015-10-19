@@ -303,6 +303,16 @@ class Manager {
 	public function getAccessList(\OCP\Files\Node $path) {
 	}
 
+	private function splitId($id) {
+		$split = explode(':', $id, 2);
+
+		if (count($split) !== 2) {
+			//Throw exception
+		}
+
+		return $split;
+	}
+
 	/**
 	 * Set permissions of share
 	 *
@@ -310,7 +320,13 @@ class Manager {
 	 * @param int $permissions
 	 */
 	public function setPermissions($id, $permissions) {
-		//TODO check permissions sainity
+		if ($permissions & \OCP\Constants::PERMISSION_READ === 0) {
+			//TODO Exception all shares require read access
+		}
+
+		list($providerId, $shareId) = $this->splitId($id);
+		$provider = getShareProvider($providerId):
+		$provider->setSharePermissions($shareId, $permissions);
 	}
 
 	/**
@@ -321,6 +337,10 @@ class Manager {
 	 */
 	public function setExpirationDate($id, \DateTime $expireDate) {
 		//TODO Date sanitation
+
+		list($providerId, $shareId) = $this->splitId($id);
+		$provider = getShareProvider($providerId):
+		$provider->setShareExpirationDate($shareId, $expireDate);
 	}
 
 	/**
@@ -330,7 +350,9 @@ class Manager {
 	 * @param string $password
 	 */
 	public function verifyPassword($id, $password) {
-
+		list($providerId, $shareId) = $this->splitId($id);
+		$provider = getShareProvider($providerId):
+		$provider->verifySharePassword($shareId, $password);
 	}
 
 	/**
@@ -340,7 +362,9 @@ class Manager {
 	 * @param string $password
 	 */
 	public function setPassword($id, $password) {
-
+		list($providerId, $shareId) = $this->splitId($id);
+		$provider = getShareProvider($providerId):
+		$provider->setSharePassword($shareId, $permissions);
 	}
 
 	/**
@@ -349,6 +373,9 @@ class Manager {
 	 * @param string $id
 	 */
 	public function accept($id) {
+		list($providerId, $shareId) = $this->splitId($id);
+		$provider = getShareProvider($providerId):
+		$provider->acceptShare($shareId);
 	}
 
 	/**
@@ -357,7 +384,9 @@ class Manager {
 	 * @param string $id
 	 */
 	public function reject($id) {
-
+		list($providerId, $shareId) = $this->splitId($id);
+		$provider = getShareProvider($providerId):
+		$provider->rejectShare($shareId);
 	}
 
 	/**
@@ -366,6 +395,9 @@ class Manager {
 	 * @param string $id
 	 */
 	public function delete($id) {
+		list($providerId, $shareId) = $this->splitId($id);
+		$provider = getShareProvider($providerId):
+		$provider->deleteShare($shareId);
 	}
 
 	/**
