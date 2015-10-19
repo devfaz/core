@@ -15,8 +15,6 @@ interface IShareProvider {
 	 * @param int $permissions
 	 * @param \DateTime $expireDate
 	 * @param $password
-	 *
-	 * @return Share
 	 */
 	public function share(\OCP\Files\Node $path,
 	                      $shareType,
@@ -30,7 +28,6 @@ interface IShareProvider {
 	 * Get all shares by the given user
 	 *
 	 * @param IUser $user
-	 * @return [Shares]
 	 */
 	public function getShares(IUser $user);
 
@@ -38,7 +35,6 @@ interface IShareProvider {
 	 * Get share by id
 	 *
 	 * @param int $id
-	 * @return Share
 	 */
 	public function getShareById($id);
 

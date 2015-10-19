@@ -5,6 +5,7 @@ namespace OC\Share20;
 use OCP\IUserManager;
 use OCP\IGroupManager;
 use OCP\IUser;
+use OCP\ILogger;
 
 use OC\Share20\Exceptions\ShareNotFoundException;
 
@@ -34,16 +35,21 @@ class Manager {
 	/** @var IGroupManager */
 	private $groupManager;
 
+	/** @var ILogger */
+	private $logger;
+
 	public function __construct(IShareProvider $storageShareProvider,
 	                            IShareProvider $federatedShareProvider,
 	                            IUser $user,
 	                            IUserManager $userManager,
-	                            IGroupManager $groupManager) {
+	                            IGroupManager $groupManager,
+								ILogger $logger) {
 		$this->storageShareProvider = $storageShareProvider;
 		$this->federatedShareProvider = $federatedShareProvider;
 		$this->user = $user;
 		$this->userManager = $userManager;
 		$this->groupManager = $groupManager;
+		$this->logger = $logger;
 	}
 
 	/**
@@ -55,8 +61,6 @@ class Manager {
 	 * @param int $permissions
 	 * @param \DateTime $expireDate
 	 * @param $password
-	 *
-	 * @return Share
 	 */
 	public function share(\OCP\Files\Node $path,
 	                      $shareType,
@@ -64,12 +68,38 @@ class Manager {
 	                      $permissions = 31,
 	                      \DateTime $expireDate = null,
 	                      $password = null) {
+
+		//TODO some path checkes?
+
+		//TODO check shareWith
+
+		//TODO check for sane permissions
+
+		/* 
+		 * TODO first sanity expiredate validations
+		 * So no dates in past. Sanitize date (so no time)
+		 * Globally enforced dates
+		 */
+
+		/*
+		 * TODO Verify password strength etc
+		 */
+
+		if ($shareType === \OC\Share\Constants::SHARE_TYPE_USER ||
+		    $shareType === \OC\Share\Constants::SHARE_TYPE_GROUP ||
+		    $shareType === \OC\Share\Constants::SHARE_TYPE_LINK) {
+			$share = $this->storageShareProvider($path, $shareType, $shareWith, $permissions, $expireDate, $password);			
+		} else if ($shareType === \OC\Share\Constants::SHARE_TYPE_REMOTE) {
+			$share = $this->federatedShareProvider($path, $shareType, $shareWith, $permissions, $expireDate, $password);
+		} else {
+			//TODO: EXCEPTION not a valid share type
+		}
+
+		return $share;
 	}
 
 	/**
 	 * Retrieve all share by the current user
-	 *
-	 * @return [Share]
 	 */
 	public function getShares() {
 		$storageShares = $this->storageShareProvider->getShares($this->currentUser);
@@ -85,7 +115,6 @@ class Manager {
 	 * Retrieve a share by the share id
 	 *
 	 * @param int $id
-	 * @return Share
 	 *
 	 * @throws ShareNotFoundException
 	 */
@@ -107,7 +136,6 @@ class Manager {
 	 * Get all the shares for a given path
 	 *
 	 * @param \OCP\Files\Node $path
-	 * @return [Share]
 	 */
 	public function getSharesByPath(\OCP\Files\Node $path) {
 		$storageShares = $this->storageShareProvider->getSharesByPath($this->currentUser, $path);
@@ -122,7 +150,7 @@ class Manager {
 	/**
 	 * Get all shares that are shared with the current user
 	 *
-	 * @return [Share]
+	 * @param int $shareType
 	 */
 	public function getSharedWithMe($shareType = null) {
 		$storageShares = $this->storageShareProvider->getSharedWithMe($this->currentUser, $shareType);
@@ -138,7 +166,6 @@ class Manager {
 	 * Get the share by token
 	 *
 	 * @param string $token
-	 * @return Share
 	 *
 	 * @throws ShareNotFoundException
 	 */
@@ -177,9 +204,73 @@ class Manager {
 	 * This is required for encryption
 	 *
 	 * @param \OCP\Files\Node $path
-	 * @return array
 	 */
 	public function getAccessList(\OCP\Files\Node $path) {
+	}
+
+	/**
+	 * Set permissions of share
+	 *
+	 * @param int $id
+	 * @param int $permissions
+	 */
+	public function setPermissions($id, $permissions) {
+		//TODO check permissions sainity
+	}
+
+	/**
+	 * Set expiration date of share
+	 *
+	 * @param int $id
+	 * @param \DateTime $expireDate
+	 */
+	public function setExpirationDate($id, \DateTime $expireDate) {
+		//TODO Date sanitation
+	}
+
+	/**
+	 * Verify password of share
+	 *
+	 * @param int $id
+	 * @param string $password
+	 */
+	public function verifyPassword($id, $password) {
+
+	}
+
+	/**
+	 * Set password of share
+	 *
+	 * @param int $id
+	 * @param string $password
+	 */
+	public function setPassword($id, $password) {
+
+	}
+
+	/**
+	 * Accept a share
+	 *
+	 * @param int $id
+	 */
+	public function accept($id) {
+	}
+
+	/**
+	 * Reject a share
+	 *
+	 * @param int $id
+	 */
+	public function reject($id) {
+
+	}
+
+	/**
+	 * Delete a share
+	 *
+	 * @param int $id
+	 */
+	public function delete($id) {
 	}
 
 	/**
