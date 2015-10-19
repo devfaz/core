@@ -57,7 +57,7 @@ class Manager {
 	 * 
 	 * @param \OCP\Files\Node $path
 	 * @param int $shareType
-	 * @param \OCP\IUser|\OCP\IGroup|string $shareWith
+	 * @param string $shareWith
 	 * @param int $permissions
 	 * @param \DateTime $expireDate
 	 * @param $password
@@ -114,7 +114,7 @@ class Manager {
 	/**
 	 * Retrieve a share by the share id
 	 *
-	 * @param int $id
+	 * @param string $id
 	 *
 	 * @throws ShareNotFoundException
 	 */
@@ -210,7 +210,7 @@ class Manager {
 	/**
 	 * Set permissions of share
 	 *
-	 * @param int $id
+	 * @param string $id
 	 * @param int $permissions
 	 */
 	public function setPermissions($id, $permissions) {
@@ -220,7 +220,7 @@ class Manager {
 	/**
 	 * Set expiration date of share
 	 *
-	 * @param int $id
+	 * @param string $id
 	 * @param \DateTime $expireDate
 	 */
 	public function setExpirationDate($id, \DateTime $expireDate) {
@@ -230,7 +230,7 @@ class Manager {
 	/**
 	 * Verify password of share
 	 *
-	 * @param int $id
+	 * @param string $id
 	 * @param string $password
 	 */
 	public function verifyPassword($id, $password) {
@@ -240,7 +240,7 @@ class Manager {
 	/**
 	 * Set password of share
 	 *
-	 * @param int $id
+	 * @param string $id
 	 * @param string $password
 	 */
 	public function setPassword($id, $password) {
@@ -250,7 +250,7 @@ class Manager {
 	/**
 	 * Accept a share
 	 *
-	 * @param int $id
+	 * @param string $id
 	 */
 	public function accept($id) {
 	}
@@ -258,7 +258,7 @@ class Manager {
 	/**
 	 * Reject a share
 	 *
-	 * @param int $id
+	 * @param string $id
 	 */
 	public function reject($id) {
 
@@ -267,7 +267,7 @@ class Manager {
 	/**
 	 * Delete a share
 	 *
-	 * @param int $id
+	 * @param string $id
 	 */
 	public function delete($id) {
 	}
@@ -275,7 +275,7 @@ class Manager {
 	/**
 	 * Get the share provider based on the share id
 	 *
-	 * @param int $id
+	 * @param string $id
 	 * @return IShareProvider
 	 */
 	private function getShareProvider($id) {
