@@ -71,15 +71,54 @@ class Manager {
 
 		//TODO some path checkes?
 
-		//TODO check shareWith
+		/*
+		 * Basic sanity checks for the $shareType and $shareWith
+		 */
+		if ($shareType === \OC\Share\Constants::SHARE_TYPE_USER) {
+			if (!$this->userManager->userExists($shareWith)) {
+				//TODO Exception time
+			}
+		} else if ($shareType === \OC\Share\Constants::SHARE_TYPE_GROUP) {
+			if (!$this->groupManager->groupExists($shareWith)) {
+				//TODO Exception time
+			}
+
+		} else if ($shareType === \OC\Share\Constants::SHARE_TYPE_LINK) {
+			// here sharewith is just an alias (could be e-mail?)
+		} else if ($shareType === \OC\Share\Constants::SHARE_TYPE_REMOTE) {
+			//Verify that $shareWith is a valid remote addess
+		} else {
+			//TODO Exception time
+		}
 
 		//TODO check for sane permissions
+		if ($permissions & \OCP\Constants::PERMISSION_READ === 0) {
+			//TODO Exception all shares require read access
+		} else {
+			//TODO Verify permissions make sense
+			// e.g. Shares of a file can't have delete permissions etc
+		}
 
 		/* 
 		 * TODO first sanity expiredate validations
 		 * So no dates in past. Sanitize date (so no time)
 		 * Globally enforced dates
 		 */
+		if ($expireDate !== null) {
+			// We don't care about time
+			$expireDate->setTime(0,0,0);
+
+			$currentDate = new \DateTime();
+			$currentDate->setTime(0,0,0);
+
+			// Expiredate can't be in the past
+			if ($expireDate <= $currentDate) {
+				//TODO Expcetion time
+			}
+
+			//TODO Check enfroced expiration
+		}
+
 
 		/*
 		 * TODO Verify password strength etc
@@ -127,7 +166,7 @@ class Manager {
 			//TODO: Some error handling?
 			throw new ShareNotFoundException();
 		}
-		
+
 		return $share;
 	}
 
