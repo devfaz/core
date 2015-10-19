@@ -119,7 +119,6 @@ class Manager {
 	 * @throws ShareNotFoundException
 	 */
 	public function getShareById($id) {
-		//TODO some magic to deterine which provider is responsible for the id
 		$provider = getShareProvider($id);
 
 		try {
@@ -282,4 +281,24 @@ class Manager {
 	private function getShareProvider($id) {
 
 	}
+
+	/**
+	 * Verify that all the required fields are present
+	 *
+	 * @param mixed[] $share
+	 * @return mixed[]
+	 */
+	private function verifyShare($share) {
+	}
+
+	/**
+	 * Format a share properly
+	 * 	permissions => int
+	 *  expireDate => ISO 8601 date
+	 *
+	 * @param mixed[] $share
+	 */
+	private function formatShare($share) {
+	}
+
 }
