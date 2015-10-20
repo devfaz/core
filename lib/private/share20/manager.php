@@ -16,15 +16,17 @@ use OC\Share20\Exceptions\ShareNotFoundException;
  */
 class Manager {
 
-	/**
-	 * @var IShareProvider[]
-	 */
-	private $shareProviders;
+	const STORAGEPROVIDERID = "loc";
+	const FEDERATEDPROVIDERID = "fed";
 
 	/**
-	 * @var IShareProver[]
+	 * @var IShareProvider
 	 */
-	private $shareTypeToShareProvider;
+	private $storageShareProvider;
+
+	/* @var IShareProvider
+	 */
+	private $federatedShareProvider;
 
 	/** @var IUser */
 	private $currentUser;
@@ -42,43 +44,20 @@ class Manager {
 	private $appConfig;
 
 	public function __construct(IUser $user,
-	                            IUserManager $userManager,
-	                            IGroupManager $groupManager,
+								IUserManager $userManager,
+								IGroupManager $groupManager,
 								ILogger $logger,
-								IAppConfig $appConfig) {
+								IAppConfig $appConfig,
+								IShareProvider $storageShareProvider,
+								IShareProvider $federatedShareProvider) {
 		$this->user = $user;
 		$this->userManager = $userManager;
 		$this->groupManager = $groupManager;
 		$this->logger = $logger;
 		$this->appConfig = $appConfig;
-	}
 
-	/**
-	 * Registers a callback function which much return a IShareProvider
-	 *
-	 * @param string $id
-	 * @param string $displayName
-	 * @param int[] $shareTypes
-	 * @param callacble $callBack
-	 */
-	public function registerShareProvider($id, $displayName, $shareTypes, callable $callBack) {
-		if (isset($this->shareProviders[$id])) {
-			//THROW EXCEPTION
-		}
-
-		$this->shareProviders[$id] = [
-			'id' => $id,
-			'displayName' => $displayName,
-			'shareTypes' => $shareTypes,
-			'callback' => $callBack,
-		];
-
-		foreach ($shareTypes as $shareType) {
-			if (isset($this->shareTypeToShareProvider[$shareType])) {
-				//THROW EXCEPTION
-			}
-			$this->shareTypeToShareProvider[$shareType] = $id;
-		}
+		$this->storageShareProvider = $storageShareProvider;
+		$this->federatedShareProvider = $federatedShareProvider;
 	}
 
 	/**
@@ -88,16 +67,13 @@ class Manager {
 	 * @return IShareProvider
 	 */
 	private function getShareProvider($id) {
-		if (!isset($this->shareProviders)) {
-			//Throw exception
+		if ($id === STORAGEPROVIDERID) {
+			return $this->storageShareProvider;
+		} else if ($id === FEDERATEDPROVIDERID) P
+			return $this->federatedShareProvider;
+		} else {
+			//TODO Throw exception
 		}
-
-		$provider = call_user_func($this->shareProviders[$id]['callback']);
-		if (!($provider instanceof \OC\Share20\IShareProvider)) {
-			//Throw exception
-		}
-
-		return $provider;
 	}
 
 	/**
@@ -107,11 +83,15 @@ class Manager {
 	 * @return IShareProvider
 	 */
 	private function getShareProviderByType($shareType) {
-		if (!isset($this->shareTypeToShareProvider[$shareType])) {
+		if ($shareType === \OC\Share\Constants::SHARE_TYPE_USER  ||
+		    $shareType === \OC\Share\Constants::SHARE_TYPE_GROUP ||
+		    $shareType === \OC\Share\Constants::SHARE_TYPE_LINK) {
+			return $this->storageShareProvider;
+		} else if ($shareType === \OC\Share\Constants::SHARE_TYPE_REMOTE) {
+			return $this->federatedShareProvider;
+		} else {
 			//Throw exception
 		}
-
-		return $this->getShareProvider($this->shareTypeToShareProvider[$shareType]);
 	}
 
 	/**
@@ -124,12 +104,12 @@ class Manager {
 	 * @param \DateTime $expireDate
 	 * @param $password
 	 */
-	public function share($path,
-	                      $shareType,
-	                      $shareWith,
-	                      $permissions = 31,
-	                      \DateTime $expireDate = null,
-	                      $password = null) {
+	public function createShare($path,
+								$shareType,
+								$shareWith,
+								$permissions = 31,
+								\DateTime $expireDate = null,
+								$password = null) {
 
 		//TODO some path checkes
 		//Convert to Node etc
@@ -217,7 +197,7 @@ class Manager {
 		$provider = getShareProvider($id);
 
 		try {
-			$share = $provider->storageShareProvider->getShareById($this->currentUser, $id);
+			$share = $provider->getShareById($this->currentUser, $id);
 		} catch (ShareNotFoundException $e) {
 			//TODO: Some error handling?
 			throw new ShareNotFoundException();
