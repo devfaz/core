@@ -174,9 +174,13 @@ class Manager {
 	}
 
 	/**
-	 * Retrieve all share by the current user
+	 * Retrieve all shares by the current user
+	 *
+	 * @param int $page
+	 * @param int $perPage
 	 */
-	public function getShares() {
+	public function getShares($page=0, $perPage=50) {
+		//TODO proper pagination
 		$storageShares = $this->storageShareProvider->getShares($this->currentUser);
 		$federatedShares = $this->federatedShareProvider->getShares($this->currentUser);
 
@@ -210,8 +214,11 @@ class Manager {
 	 * Get all the shares for a given path
 	 *
 	 * @param \OCP\Files\Node $path
+	 * @param int $page
+	 * @param int $perPage
 	 */
-	public function getSharesByPath(\OCP\Files\Node $path) {
+	public function getSharesByPath(\OCP\Files\Node $path, $page=0, $perPage=50) {
+		//TODO proper pagination
 		$storageShares = $this->storageShareProvider->getSharesByPath($this->currentUser, $path);
 		$federatedShares = $this->federatedShareProvider->getSharesByPath($this->currentUser, $path);
 
@@ -225,8 +232,11 @@ class Manager {
 	 * Get all shares that are shared with the current user
 	 *
 	 * @param int $shareType
+	 * @param int $page
+	 * @param int $perPage
 	 */
-	public function getSharedWithMe($shareType = null) {
+	public function getSharedWithMe($shareType = null, $page=0, $perPage=50) {
+		//TODO proper pagination
 		$storageShares = $this->storageShareProvider->getSharedWithMe($this->currentUser, $shareType);
 		$federatedShares = $this->federatedShareProvider->getSharedWithMe($this->currentUser, $shareType);
 
