@@ -9,19 +9,25 @@ interface IShareProvider {
 	/**
 	 * Share a path
 	 * 
-	 * @param \OCP\Files\Node $path
-	 * @param int $shareType
-	 * @param \OCP\IUser|\OCP\IGroup|string $shareWith
-	 * @param int $permissions
-	 * @param \DateTime $expireDate
-	 * @param $password
+	 * @param Share $share
+	 * @return Share The share object
 	 */
-	public function share(\OCP\Files\Node $path,
-	                      $shareType,
-	                      $shareWith,
-	                      $permissions = 31,
-	                      \DateTime $expireDate = null,
-	                      $password = null);
+	public function create(Share $share);
+
+	/**
+	 * Update a share
+	 *
+	 * @param Share $share
+	 * @return Share The share object
+	 */
+	public function update(Share $share);
+
+	/**
+	 * Delete a share
+	 *
+	 * @param Share $share
+	 */
+	public function delete(Share $share);
 
 	/**
 	 * Get all shares by the given user
@@ -53,63 +59,10 @@ interface IShareProvider {
 	public function getSharedWithMe(IUser $user, $shareType = null);
 
 	/**
-	 * Get a share by token
+	 * Get a share by token and if present verify the password
 	 *
 	 * @param string $token
-	 */
-	public function getShareByToken($token);
-
-
-	/**
-	 * Set the expiration date
-	 *
-	 * @param int $id
-	 * @param \DateTime $expireDate
-	 */
-	public function setShareExpirationDate($id, \DateTime $expireDate);
-
-	/**
-	 * Set permissions
-	 *
-	 * @param int $id
-	 * @param int $permissions
-	 */
-	public function setSharePermissions($id, $permissions);
-
-	/**
-	 * Set password
-	 *
-	 * @param int $id
 	 * @param string $password
 	 */
-	public function setSharePassword($id, $password);
-
-	/**
-	 * Verify the password
-	 *
-	 * @param int $id
-	 * @param string $password
-	 */
-	public function verifySharePassword($id, $password);
-
-	/**
-	 * Accept a share
-	 *
-	 * @param int $id
-	 */
-	public function acceptShare($id);
-
-	/**
-	 * Reject a share
-	 *
-	 * @param int $id
-	 */
-	public function rejectShare($id);
-
-	/**
-	 * Delete a share
-	 * 
-	 * @param int $id
-	 */
-	public function deleteShare($id);
+	public function getShareByToken($token, $password = null);
 }

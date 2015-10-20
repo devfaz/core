@@ -69,7 +69,7 @@ class Manager {
 	private function getShareProvider($id) {
 		if ($id === STORAGEPROVIDERID) {
 			return $this->storageShareProvider;
-		} else if ($id === FEDERATEDPROVIDERID) P
+		} else if ($id === FEDERATEDPROVIDERID) {
 			return $this->federatedShareProvider;
 		} else {
 			//TODO Throw exception
@@ -97,80 +97,40 @@ class Manager {
 	/**
 	 * Share a path
 	 * 
-	 * @param string $path
-	 * @param int $shareType
-	 * @param string $shareWith
-	 * @param int $permissions
-	 * @param \DateTime $expireDate
-	 * @param $password
+	 * @param Share $share
+	 * @return Share The share object
 	 */
-	public function createShare($path,
-								$shareType,
-								$shareWith,
-								$permissions = 31,
-								\DateTime $expireDate = null,
-								$password = null) {
+	public function createShare(Share $share) {
+		$provider = $this->getShareProviderByType($share->getShareType());
+		$share = $provider->create($share);
 
-		//TODO some path checkes
-		//Convert to Node etc
-
-		/*
-		 * Basic sanity checks for the $shareType and $shareWith
-		 */
-		if ($shareType === \OC\Share\Constants::SHARE_TYPE_USER) {
-			if (!$this->userManager->userExists($shareWith)) {
-				//TODO Exception time
-			}
-		} else if ($shareType === \OC\Share\Constants::SHARE_TYPE_GROUP) {
-			if (!$this->groupManager->groupExists($shareWith)) {
-				//TODO Exception time
-			}
-
-		} else if ($shareType === \OC\Share\Constants::SHARE_TYPE_LINK) {
-			// here sharewith is just an alias (could be e-mail?)
-		} else if ($shareType === \OC\Share\Constants::SHARE_TYPE_REMOTE) {
-			//Verify that $shareWith is a valid remote addess
-		} else {
-			//TODO Exception time
-		}
-
-		//TODO check for sane permissions
-		if ($permissions & \OCP\Constants::PERMISSION_READ === 0) {
-			//TODO Exception all shares require read access
-		} else {
-			//TODO Verify permissions make sense
-			// e.g. Shares of a file can't have delete permissions etc
-		}
-
-		/* 
-		 * TODO first sanity expiredate validations
-		 * So no dates in past. Sanitize date (so no time)
-		 * Globally enforced dates
-		 */
-		if ($expireDate !== null) {
-			// We don't care about time
-			$expireDate->setTime(0,0,0);
-
-			$currentDate = new \DateTime();
-			$currentDate->setTime(0,0,0);
-
-			// Expiredate can't be in the past
-			if ($expireDate <= $currentDate) {
-				//TODO Expcetion time
-			}
-
-			//TODO Check enfroced expiration
-		}
-
-
-		/*
-		 * TODO Verify password strength etc
-		 */
-
-		$provider = $this->getShareProviderByType($shareType);
-		$share = $provider->share($path, $shareType, $shareWith, $permissions, $expireDate, $password);
+		//TODO set proper provider ID to share
 
 		return $share;
+	}
+
+	/**
+	 * Update a share
+	 *
+	 * @param Share $share
+	 * @return Share The share object
+	 */
+	public function updateShare(Share $share) {
+		$provider = $this->getShareProviderByType($share->getShareType());
+		$share = $provider->update($share);
+
+		return $share;
+	}
+
+	/**
+	 * Delete a share
+	 *
+	 * @param Share $share
+	 */
+	public function deleteShare(Share $share) {
+		$provider = $this->getShareProviderByType($share->getShareType());
+		
+		$provider->delete($share);
 	}
 
 	/**
@@ -178,6 +138,7 @@ class Manager {
 	 *
 	 * @param int $page
 	 * @param int $perPage
+	 * @return Share[]
 	 */
 	public function getShares($page=0, $perPage=50) {
 		//TODO proper pagination
@@ -194,6 +155,7 @@ class Manager {
 	 * Retrieve a share by the share id
 	 *
 	 * @param string $id
+	 * @return Share
 	 *
 	 * @throws ShareNotFoundException
 	 */
@@ -216,6 +178,8 @@ class Manager {
 	 * @param \OCP\Files\Node $path
 	 * @param int $page
 	 * @param int $perPage
+	 *
+	 * @return Share[]
 	 */
 	public function getSharesByPath(\OCP\Files\Node $path, $page=0, $perPage=50) {
 		//TODO proper pagination
@@ -234,6 +198,8 @@ class Manager {
 	 * @param int $shareType
 	 * @param int $page
 	 * @param int $perPage
+	 *
+	 * @return Share[]
 	 */
 	public function getSharedWithMe($shareType = null, $page=0, $perPage=50) {
 		//TODO proper pagination
@@ -247,13 +213,16 @@ class Manager {
 	}
 
 	/**
-	 * Get the share by token
+	 * Get the share by token possible with password
 	 *
 	 * @param string $token
+	 * @param string $password
+	 *
+	 * @return Share
 	 *
 	 * @throws ShareNotFoundException
 	 */
-	public function getShareByToken($token) {
+	public function getShareByToken($token, $password=null) {
 		// Only link shares have tokens and they are handeld by the storageShareProvider
 		try {
 			$share = $this->storageShareProvider->getShareByToken($this->currentUser, $token);
@@ -301,111 +270,4 @@ class Manager {
 
 		return $split;
 	}
-
-	/**
-	 * Set permissions of share
-	 *
-	 * @param string $id
-	 * @param int $permissions
-	 */
-	public function setPermissions($id, $permissions) {
-		if ($permissions & \OCP\Constants::PERMISSION_READ === 0) {
-			//TODO Exception all shares require read access
-		}
-
-		list($providerId, $shareId) = $this->splitId($id);
-		$provider = $this->getShareProvider($providerId);
-		$provider->setSharePermissions($shareId, $permissions);
-	}
-
-	/**
-	 * Set expiration date of share
-	 *
-	 * @param string $id
-	 * @param \DateTime $expireDate
-	 */
-	public function setExpirationDate($id, \DateTime $expireDate) {
-		//TODO Date sanitation
-
-		list($providerId, $shareId) = $this->splitId($id);
-		$provider = $this->getShareProvider($providerId);
-		$provider->setShareExpirationDate($shareId, $expireDate);
-	}
-
-	/**
-	 * Verify password of share
-	 *
-	 * @param string $id
-	 * @param string $password
-	 */
-	public function verifyPassword($id, $password) {
-		list($providerId, $shareId) = $this->splitId($id);
-		$provider = $this->getShareProvider($providerId);
-		$provider->verifySharePassword($shareId, $password);
-	}
-
-	/**
-	 * Set password of share
-	 *
-	 * @param string $id
-	 * @param string $password
-	 */
-	public function setPassword($id, $password) {
-		list($providerId, $shareId) = $this->splitId($id);
-		$provider = $this->getShareProvider($providerId);
-		$provider->setSharePassword($shareId, $permissions);
-	}
-
-	/**
-	 * Accept a share
-	 *
-	 * @param string $id
-	 */
-	public function accept($id) {
-		list($providerId, $shareId) = $this->splitId($id);
-		$provider = $this->getShareProvider($providerId);
-		$provider->acceptShare($shareId);
-	}
-
-	/**
-	 * Reject a share
-	 *
-	 * @param string $id
-	 */
-	public function reject($id) {
-		list($providerId, $shareId) = $this->splitId($id);
-		$provider = $this->getShareProvider($providerId);
-		$provider->rejectShare($shareId);
-	}
-
-	/**
-	 * Delete a share
-	 *
-	 * @param string $id
-	 */
-	public function delete($id) {
-		list($providerId, $shareId) = $this->splitId($id);
-		$provider = $this->getShareProvider($providerId);
-		$provider->deleteShare($shareId);
-	}
-
-	/**
-	 * Verify that all the required fields are present
-	 *
-	 * @param mixed[] $share
-	 * @return mixed[]
-	 */
-	private function verifyShare($share) {
-	}
-
-	/**
-	 * Format a share properly
-	 * 	permissions => int
-	 *  expireDate => ISO 8601 date
-	 *
-	 * @param mixed[] $share
-	 */
-	private function formatShare($share) {
-	}
-
 }
