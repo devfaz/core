@@ -21,8 +21,7 @@ interface IShareProvider {
 	                      $shareWith,
 	                      $permissions = 31,
 	                      \DateTime $expireDate = null,
-	                      $password = null) {
-	}
+	                      $password = null);
 
 	/**
 	 * Get all shares by the given user

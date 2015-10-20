@@ -3,7 +3,7 @@
 namespace OC\Share20;
 
 
-use OCP\IAppConfig
+use OCP\IAppConfig;
 use OCP\IUserManager;
 use OCP\IGroupManager;
 use OCP\IUser;
@@ -197,7 +197,6 @@ class Manager {
 	 * Retrieve all share by the current user
 	 */
 	public function getShares() {
-
 		$storageShares = $this->storageShareProvider->getShares($this->currentUser);
 		$federatedShares = $this->federatedShareProvider->getShares($this->currentUser);
 
@@ -325,7 +324,7 @@ class Manager {
 		}
 
 		list($providerId, $shareId) = $this->splitId($id);
-		$provider = getShareProvider($providerId):
+		$provider = $this->getShareProvider($providerId);
 		$provider->setSharePermissions($shareId, $permissions);
 	}
 
@@ -339,7 +338,7 @@ class Manager {
 		//TODO Date sanitation
 
 		list($providerId, $shareId) = $this->splitId($id);
-		$provider = getShareProvider($providerId):
+		$provider = $this->getShareProvider($providerId);
 		$provider->setShareExpirationDate($shareId, $expireDate);
 	}
 
@@ -351,7 +350,7 @@ class Manager {
 	 */
 	public function verifyPassword($id, $password) {
 		list($providerId, $shareId) = $this->splitId($id);
-		$provider = getShareProvider($providerId):
+		$provider = $this->getShareProvider($providerId);
 		$provider->verifySharePassword($shareId, $password);
 	}
 
@@ -363,7 +362,7 @@ class Manager {
 	 */
 	public function setPassword($id, $password) {
 		list($providerId, $shareId) = $this->splitId($id);
-		$provider = getShareProvider($providerId):
+		$provider = $this->getShareProvider($providerId);
 		$provider->setSharePassword($shareId, $permissions);
 	}
 
@@ -374,7 +373,7 @@ class Manager {
 	 */
 	public function accept($id) {
 		list($providerId, $shareId) = $this->splitId($id);
-		$provider = getShareProvider($providerId):
+		$provider = $this->getShareProvider($providerId);
 		$provider->acceptShare($shareId);
 	}
 
@@ -385,7 +384,7 @@ class Manager {
 	 */
 	public function reject($id) {
 		list($providerId, $shareId) = $this->splitId($id);
-		$provider = getShareProvider($providerId):
+		$provider = $this->getShareProvider($providerId);
 		$provider->rejectShare($shareId);
 	}
 
@@ -396,7 +395,7 @@ class Manager {
 	 */
 	public function delete($id) {
 		list($providerId, $shareId) = $this->splitId($id);
-		$provider = getShareProvider($providerId):
+		$provider = $this->getShareProvider($providerId);
 		$provider->deleteShare($shareId);
 	}
 
