@@ -352,6 +352,7 @@ OCA = OCA || {};
 			$('.ldap_submit').button();
 			$('.ldap_action_test_connection').button();
 			$('#ldapSettings').tabs({ beforeActivate: this.onTabChange });
+			$('#ldapWizard1 :input').tooltip({placement: "right", container: "body"});
 
 			this.initControls();
 			this.disableTabs();
