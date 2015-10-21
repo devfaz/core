@@ -16,17 +16,15 @@ use OC\Share20\Exceptions\ShareNotFoundException;
  */
 class Manager {
 
-	const STORAGEPROVIDERID = "loc";
-	const FEDERATEDPROVIDERID = "fed";
+	/**
+	 * @var IShareProvider[]
+	 */
+	private $shareProviders;
 
 	/**
-	 * @var IShareProvider
+	 * @var string[]
 	 */
-	private $storageShareProvider;
-
-	/* @var IShareProvider
-	 */
-	private $federatedShareProvider;
+	private $shareTypeToProvider;
 
 	/** @var IUser */
 	private $currentUser;
@@ -47,17 +45,46 @@ class Manager {
 								IUserManager $userManager,
 								IGroupManager $groupManager,
 								ILogger $logger,
-								IAppConfig $appConfig,
-								IShareProvider $storageShareProvider,
-								IShareProvider $federatedShareProvider) {
+								IAppConfig $appConfig) {
 		$this->user = $user;
 		$this->userManager = $userManager;
 		$this->groupManager = $groupManager;
 		$this->logger = $logger;
 		$this->appConfig = $appConfig;
 
-		$this->storageShareProvider = $storageShareProvider;
-		$this->federatedShareProvider = $federatedShareProvider;
+		// TODO: Get storage share provider from primary storage
+	}
+
+	/**
+	 * Register a callback function which must return an IShareProvider instance
+	 *
+	 * @param string $id
+	 * @param int $shareTypes
+	 * @param callable $callback
+	 *
+	 * @throws ShareProviderAlready
+	 */
+	public function registerShareProvider($id, $shareTypes, callable $callback) {
+		/*
+		 * Providers ids have to be unique
+		 */
+		if (isset($this->shareProviders[$id])) {
+			//TODO Exception
+		}
+
+		/*
+		 * For now if a share provider registers itself with a number of supported share types
+		 * this only succeeds if none of those are already registered.
+		 * This is a limitation we might want to lift later but for now it makes sense
+		 */
+		if (count(array_intersect(array_keys($this->shareTypeToProvider, $shareTypes)))) {
+			//TODO Exception
+		}
+
+		$this->shareProviders[$id] = $callback;
+		foreach ($shareTypes as $shareType) {
+			$this->shareTypeToProviderId[$shareType] = $id;
+		}
 	}
 
 	/**
@@ -67,13 +94,21 @@ class Manager {
 	 * @return IShareProvider
 	 */
 	private function getShareProvider($id) {
-		if ($id === STORAGEPROVIDERID) {
-			return $this->storageShareProvider;
-		} else if ($id === FEDERATEDPROVIDERID) {
-			return $this->federatedShareProvider;
-		} else {
-			//TODO Throw exception
+		if (!isset($this->shareProviders[$id])) {
+			//Throw exception;
 		}
+
+		// Check if we have instanciated this provider yet
+		if (!($this->shareProviders[$id] instanceOf OC\Share20\IShareProvider)) {
+			$this->shareProviders[$id] = call_user_func($this->shareProviders[$id]);
+
+			// Check if it actually is a IShareProvider
+			if (!($provider instanceOf OC\Share20\IShareProvider)) {
+				//TODO Throw exception
+			}
+		}
+
+		return $this->shareProviders[$id];
 	}
 
 	/**
@@ -83,15 +118,11 @@ class Manager {
 	 * @return IShareProvider
 	 */
 	private function getShareProviderByType($shareType) {
-		if ($shareType === \OC\Share\Constants::SHARE_TYPE_USER  ||
-		    $shareType === \OC\Share\Constants::SHARE_TYPE_GROUP ||
-		    $shareType === \OC\Share\Constants::SHARE_TYPE_LINK) {
-			return $this->storageShareProvider;
-		} else if ($shareType === \OC\Share\Constants::SHARE_TYPE_REMOTE) {
-			return $this->federatedShareProvider;
-		} else {
+		if (!isset($this->shareTypeToProviderId[$shareType])) {
 			//Throw exception
 		}
+
+		return $this->getShareProvider($this->shareTypeToProviderId[$shareType]);
 	}
 
 	/**
