@@ -33,6 +33,7 @@ interface IShareProvider {
 	 * Get all shares by the given user
 	 *
 	 * @param IUser $user
+	 * @return Share[]
 	 */
 	public function getShares(IUser $user);
 
@@ -40,6 +41,7 @@ interface IShareProvider {
 	 * Get share by id
 	 *
 	 * @param int $id
+	 * @return Share
 	 */
 	public function getShareById($id);
 
@@ -47,6 +49,7 @@ interface IShareProvider {
 	 * Get shares for a given path
 	 *
 	 * @param \OCP\Files\Node $path
+	 * @param Share[]
 	 */
 	public function getSharesByPath(\OCP\IUser $user, \OCP\Files\Node $path);
 
@@ -55,6 +58,7 @@ interface IShareProvider {
 	 *
 	 * @param IUser $user
 	 * @param int $shareType
+	 * @param Share
 	 */
 	public function getSharedWithMe(IUser $user, $shareType = null);
 
@@ -63,6 +67,7 @@ interface IShareProvider {
 	 *
 	 * @param string $token
 	 * @param string $password
+	 * @param Share
 	 */
 	public function getShareByToken($token, $password = null);
 }
