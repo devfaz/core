@@ -172,13 +172,33 @@ class Manager {
 	 * @return Share[]
 	 */
 	public function getShares($page=0, $perPage=50) {
-		//TODO proper pagination
-		$storageShares = $this->storageShareProvider->getShares($this->currentUser);
-		$federatedShares = $this->federatedShareProvider->getShares($this->currentUser);
+		$shares = [];
 
-		//TODO: ID's should be unique who handles this?
+		$start = $page * $perPage;
+		$left = $perPage;
 
-		$shares = array_merge($storageShares, $federatedShares);
+		foreach($this->shareTypeToProvider as $shareType => $providerId) {
+			if ($left === 0) {
+				break;
+			}
+
+			$provider = $this->getShareProvider($providerId);
+
+			$shareCount = $provider->getShareCount($shareType);
+			if ($shareCount > $start) {
+				$tmp = $provider->getShares($this->currentUser, $shareType, $start, $left);
+
+				$left = $left - count($tmp);
+				$start = 0;
+
+				//TODO some share verification here
+
+				$shares = array_merge($shares, $tmp);
+			} else {
+				$start = $start - $shareCount;
+			}
+		}
+
 		return $shares;
 	}
 
