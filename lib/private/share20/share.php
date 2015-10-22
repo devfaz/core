@@ -88,6 +88,15 @@ class Share {
 	}
 
 	/**
+	 * Get the id of the ShareProvider
+	 *
+	 * @return string
+	 */
+	public function getProviderId() {
+		return $this->providerId;
+	}
+
+	/**
 	 * Set the internal (to the provider) share id
 	 * Should only be used by the share provider
 	 *
@@ -96,6 +105,7 @@ class Share {
 	 */
 	public function setInternalId($id) {
 		$this->id = $id;
+		return $this;
 	}
 
 	/**
@@ -119,6 +129,17 @@ class Share {
 	}
 
 	/**
+	 * Set the path of this share
+	 *
+	 * @param Node $path
+	 * @return Share The modified object
+	 */
+	public function setPath(Node $path) {
+		$this->path = $path;
+		return $this;
+	}
+
+	/**
 	 * Get the path of this share for the current user
 	 * 
 	 * @return Node
@@ -128,12 +149,34 @@ class Share {
 	}
 
 	/**
+	 * Set the shareType
+	 *
+	 * @param int $shareType
+	 * @return Share The modified object
+	 */
+	public function setShareType($shareType) {
+		$this->shareType = $shareType;
+		return $this;
+	}
+
+	/**
 	 * Get the shareType 
 	 *
 	 * @return int
 	 */
 	public function getShareType() {
 		return $this->shareType;
+	}
+
+	/**
+	 * Set the shareWith
+	 *
+	 * @param IUser|IGroup|string
+	 * @return Share The modified object
+	 */
+	public function setShareWith($shareWith) {
+		$this->shareWith = $shareWith;
+		return $this;
 	}
 
 	/**
@@ -248,5 +291,14 @@ class Share {
 
 		$this->password = $password;
 		return $this;
+	}
+
+	/**
+	 * Get the password
+	 *
+	 * @return string
+	 */
+	public function getPassword($password) {
+		return $this->password;
 	}
 }
