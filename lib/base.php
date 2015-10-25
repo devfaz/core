@@ -157,7 +157,7 @@ class OC {
 		}
 
 
-		if (OC::$CLI) {
+		if (OC::$CLI | OC_Config::getValue('overwritewebroot', false)) {
 			OC::$WEBROOT = OC_Config::getValue('overwritewebroot', '');
 		} else {
 			if (substr($scriptName, 0 - strlen(OC::$SUBURI)) === OC::$SUBURI) {
